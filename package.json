@@ -10,8 +10,8 @@
     "test:unit": "vue-cli-service test:unit"
   },
   "dependencies": {
-    "@google/maps": "^0.5.5",
     "axios": "^0.18.0",
+    "jp-prefecture": "^0.2.1",
     "material-icons": "^0.2.3",
     "vue": "^2.5.17",
     "vue-router": "^3.0.1",
@@ -41,7 +41,14 @@
       "@vue/airbnb"
     ],
     "rules": {
-      "import/first": ["error", "DISABLE-absolute-first"]
+      "import/first": [
+        "error",
+        "DISABLE-absolute-first"
+      ],
+      "object-shorthand": [
+        "error",
+        "properties"
+      ]
     },
     "parserOptions": {
       "parser": "babel-eslint"

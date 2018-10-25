@@ -1,12 +1,10 @@
 <template>
   <header id="header">
-    <vs-navbar v-model="activeItem">
+    <vs-navbar>
 
-      <vs-navbar-title>
-        ideal-plesear
+      <vs-navbar-title class="service-title idepre-font">
+        Ideal-plesear
       </vs-navbar-title>
-
-      <vs-spacer></vs-spacer>
 
       <vs-navbar-item index="0">
         <a href="/">ホーム</a>
@@ -20,6 +18,8 @@
   </header>
 </template>
 
-<style scoped lang="scss">
+<style lang="scss">
 
+.service-title {
+}
 </style>

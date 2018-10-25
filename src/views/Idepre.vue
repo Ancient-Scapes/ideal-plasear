@@ -1,45 +1,72 @@
 <template>
-  <div class="hello">
-    <vs-button vs-type="line" vs-line-origin="left" @click="fetchNearPlace">店を取得します</vs-button>
-
-
+  <div class="idepre-area">
     <!-- 検索条件の入力 -->
-    <div class="input-conditions">
-      <vs-input class="input-store" vs-label="店名" placeholder="検索したい店名を入力" />
-    </div>
+    <Conditions ref="conditions" />
 
-    <div class="">
-      {{ key }}
-    </div>
+    <vs-button
+      class="btn-search"
+      vs-type="filled"
+      vs-line-origin="left"
+      @click="searchFacility">
+      検索
+    </vs-button>
   </div>
 </template>
 
 <script>
+import Conditions from '@/components/idepre/Conditions.vue';
 
 export default {
   name: 'idepre',
-  // components: {
-  //   HelloWorld,
-  // },
+  components: {
+    Conditions,
+  },
   data() {
     return {
-      activeItem: 1,
-      msg: 'ルーティング試すページ',
-      key: 'key',
+      API_URL: {
+        GEOCODE: process.env.VUE_APP_API_HOST + process.env.VUE_APP_API_GEOCODE,
+        NEARBY_SEARCH: process.env.VUE_APP_API_HOST + process.env.VUE_APP_API_NEARBY_SEARCH,
+      },
     };
   },
   methods: {
-    fetchNearPlace() {
-      this.googleMapsClient.geocode({
-        address: '埼玉県所沢市',
-      })
-        .asPromise()
-        .then((response) => {
-          console.log(response.json.results);
+    searchFacility() {
+      try {
+        this.fetchGeocode()
+          .then(response => this.fetchNearBySearch(response))
+          .then(response => console.log(response.data.results));
+      } catch (e) {
+        console.log(e);
+      }
+    },
+    fetchGeocode() {
+      return new Promise((resolve, reject) => {
+        const prefectureAddress = this.$refs.conditions.prefecture;
+        this.requestGoogleMapApi(this.API_URL.GEOCODE, {
+          address: prefectureAddress,
         })
-        .catch((err) => {
-          console.log(err);
-        });
+          .then(data => resolve(data))
+          .catch(error => reject(error));
+      });
+    },
+    fetchNearBySearch(response) {
+      return new Promise((resolve, reject) => {
+        this.requestGoogleMapApi(this.API_URL.NEARBY_SEARCH, {
+          location: response.data.results[0].geometry.location,
+          radius: 1500,
+          type: 'restaurant',
+          keyword: this.$refs.conditions.facility,
+        })
+          .then(data => resolve(data))
+          .catch(error => reject(error));
+      });
+    },
+    requestGoogleMapApi(url, query) {
+      return new Promise((resolve, reject) => {
+        this.$axios.post(url, query)
+          .then(data => resolve(data))
+          .catch(error => reject(error.response));
+      });
     },
   },
 };
@@ -47,7 +74,7 @@ export default {
 
 
 <style lang="scss">
-.input-store {
-  margin: auto;
+.btn-search{
+  margin:3%;
 }
 </style>
