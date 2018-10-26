@@ -30,43 +30,38 @@ export default {
     };
   },
   methods: {
-    searchFacility() {
-      try {
-        this.fetchGeocode()
-          .then(response => this.fetchNearBySearch(response))
-          .then(response => console.log(response.data.results));
-      } catch (e) {
-        console.log(e);
+    async searchFacility() {
+      const geocodeLocation = await this.fetchGeocode();
+      const nearFacilities = await this.fetchNearBySearch(geocodeLocation);
+      console.log(nearFacilities);
+    },
+    async fetchGeocode() {
+      const query = {
+        address: this.$refs.conditions.$refs.location.prefecture,
+      };
+
+      const res = await this.$axios.post(this.API_URL.GEOCODE, query);
+      if (res.status !== 200) {
+        console.log('Error');
+        return false;
       }
+
+      return res.data.results[0].geometry.location;
     },
-    fetchGeocode() {
-      return new Promise((resolve, reject) => {
-        const prefectureAddress = this.$refs.conditions.prefecture;
-        this.requestGoogleMapApi(this.API_URL.GEOCODE, {
-          address: prefectureAddress,
-        })
-          .then(data => resolve(data))
-          .catch(error => reject(error));
-      });
-    },
-    fetchNearBySearch(response) {
-      return new Promise((resolve, reject) => {
-        this.requestGoogleMapApi(this.API_URL.NEARBY_SEARCH, {
-          location: response.data.results[0].geometry.location,
-          radius: 1500,
-          type: 'restaurant',
-          keyword: this.$refs.conditions.facility,
-        })
-          .then(data => resolve(data))
-          .catch(error => reject(error));
-      });
-    },
-    requestGoogleMapApi(url, query) {
-      return new Promise((resolve, reject) => {
-        this.$axios.post(url, query)
-          .then(data => resolve(data))
-          .catch(error => reject(error.response));
-      });
+    async fetchNearBySearch(geocodeLocation) {
+      const query = {
+        location: geocodeLocation,
+        radius: this.$refs.conditions.$refs.radius.radius,
+        type: this.$refs.conditions.$refs.facilityType.type,
+        keyword: this.$refs.conditions.$refs.facilityName.name,
+      };
+
+      const res = await this.$axios.post(this.API_URL.NEARBY_SEARCH, query);
+      if (res.status !== 200) {
+        console.log('Error');
+        return false;
+      }
+      return res.data.results;
     },
   },
 };
