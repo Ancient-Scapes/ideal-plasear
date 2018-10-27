@@ -48,7 +48,8 @@
       "object-shorthand": [
         "error",
         "properties"
-      ]
+      ],
+      "allowForLoopAfterthoughts": true
     },
     "parserOptions": {
       "parser": "babel-eslint"

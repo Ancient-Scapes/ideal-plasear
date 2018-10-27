@@ -8,29 +8,29 @@
       <Radius ref="radius"/>
     </vs-row>
 
-    <vs-row
-    vs-align="center"
-    vs-type="flex" vs-justify="space-around" vs-w="12">
-      <FacilityType ref="facilityType"/>
-      <FacilityName ref="facilityName"/>
-    </vs-row>
+    <Facility
+      v-for="facility in facilityItems"
+      :key="facility" ref="facility"
+    />
   </div>
 </template>
 
 <script>
 import Location from '@/components/idepre/conditions/Location.vue';
 import Radius from '@/components/idepre/conditions/Radius.vue';
-import FacilityType from '@/components/idepre/conditions/FacilityType.vue';
-import FacilityName from '@/components/idepre/conditions/FacilityName.vue';
+import Facility from '@/components/idepre/conditions/Facility.vue';
 
 export default {
   name: 'conditions',
+  props: {
+    facilityItems: Number,
+  },
   components: {
-    Location, Radius, FacilityType, FacilityName,
+    Location, Radius, Facility,
   },
   data() {
     return {
-      test: 'a',
+      test: 'test',
     };
   },
 };

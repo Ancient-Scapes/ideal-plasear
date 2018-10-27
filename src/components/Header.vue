@@ -20,6 +20,4 @@
 
 <style lang="scss">
 
-.service-title {
-}
 </style>
