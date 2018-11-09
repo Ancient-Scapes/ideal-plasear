@@ -20,17 +20,17 @@
       @click="addFacility">
       施設追加
     </vs-button>
-
+    
     <Result
       ref="result"
-      :resultItems="nearFacilities"/>
+      :resultItems="nearPair"/>
   </div>
 </template>
 
 <script>
 import Conditions from '@/components/idepre/Conditions.vue';
 import Result from '@/components/idepre/Result.vue';
-
+import * as S from 'spherical-geometry-js';
 
 export default {
   name: 'idepre',
@@ -43,9 +43,9 @@ export default {
         GEOCODE: process.env.VUE_APP_API_HOST + process.env.VUE_APP_API_GEOCODE,
         NEARBY_SEARCH: process.env.VUE_APP_API_HOST + process.env.VUE_APP_API_NEARBY_SEARCH,
       },
-      facilityItems: 1,
+      facilityItems: 2,
       nearFacilities: [],
-      // nearFacilities: [[{name:'サブウェイ',vicinity:'東京都豊島区池袋'}, {name:'すき家', vicinity:'東京都豊島区池袋'}]],
+      nearPair: [],
       errorMessage: '',
     };
   },
@@ -55,6 +55,7 @@ export default {
         this.nearFacilities = [];
         const geocodeLocation = await this.fetchGeocode();
 
+        // 近隣の施設を検索
         for (let i = 0; i < this.facilityItems; i++) {
           const searchResult = {
             id: i,
@@ -63,6 +64,7 @@ export default {
           };
           this.nearFacilities.push(searchResult);
         }
+        this.nearPair = await this.extractionNearPair(0, this.isNotCurrentIndex(this.nearFacilities, 0));
       } catch (e) {
         this.errorMessage = e;
       }
@@ -93,6 +95,64 @@ export default {
         throw new Error('status code not 200');
       }
       return res.data;
+    },
+    extractionNearPair(id, arrNotCurrent, arrNearPair = []) {
+      // 末尾より後に行ったら終了
+      if (!this.nearFacilities[id]) {
+        return arrNearPair;
+      }
+
+      // 計算の左辺に使用する店の全店舗を回す
+      for (var i = 0; i < this.nearFacilities[id].data.length; i++) {
+        // 計算の左辺に使用する店 ex. サブウェイ新宿店
+        const origin = this.nearFacilities[id].data[i];
+
+        // 計算の右辺に使用する店種類を回す
+        for (var j = 0; j < arrNotCurrent.length; j++) {
+          // 計算の右辺に使用する店種類の全店舗を回す
+          for (var k = 0; k < arrNotCurrent[j].data.length; k++) {
+            // 計算の右辺に使用する店 ex. すき家新宿店
+            const target = arrNotCurrent[j].data[k];
+            const pairName = [origin.name, target.name];
+            const distance = S.computeDistanceBetween(
+              this.nearFacilities[id].data[i].geometry.location,
+              arrNotCurrent[j].data[k].geometry.location, 
+            );
+        
+            const isFar = distance > 400;
+            const isDuplicates = this.isDuplicatesCheck(arrNearPair, pairName);
+
+            // 近くないペアと重複ペアは追加しない
+            if(isFar || isDuplicates) continue;
+
+            const pair = {
+              name: pairName,
+              geometry: [origin.geometry, target.geometry],
+              centerPlace: '新宿駅', //ここは別で求める
+              distance: distance,
+            };
+
+            arrNearPair.push(pair);
+          }
+        }
+      }
+
+      // 次のidへ行き、処理したidのもの以外の配列を引数にして再帰
+      const nextNotCurrentArr = this.isNotCurrentIndex(this.nearFacilities, ++id);
+      return this.extractionNearPair(id, nextNotCurrentArr, arrNearPair);
+    },
+    // 自分以外の配列を返す idはbindして渡す
+    isNotCurrentIndex(arr, index) {
+      return arr.filter(function (facility) {
+        return facility.id !== index;
+      });
+    },
+    // 重複ペアを検出
+    isDuplicatesCheck(arr, currentPair) {
+      return arr.some(function (pair) {
+      // 比較するときだけソートで順番合わせて重複チェックする
+        return pair.name.sort().join() === currentPair.sort().join();
+      });
     },
     addFacility() {
       this.facilityItems += 1;

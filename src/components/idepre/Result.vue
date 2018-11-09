@@ -4,21 +4,29 @@
     vs-align="center"
     vs-type="flex"
     vs-justify="space-around"
-    vs-w="12"
-    v-for="eachResultItems in resultItems"
-    :key="eachResultItems.id">
-     <EachResult ref="eachResult" :eachResultItems="eachResultItems"/>
+    vs-w="12">
+      <vs-col
+        vs-type="flex"
+        vs-justify="center"
+        vs-align="center"
+        vs-w="4"
+        v-for="result in resultItems"
+        :key="result">
+        <Card :headerName="result.centerPlace"
+              :facilityPair="result.name"
+              :distance="result.distance"/>
+      </vs-col>
     </vs-row>
   </div>
 </template>
 
 <script>
-import EachResult from '@/components/idepre/result/EachResult.vue';
+import Card from '@/components/idepre/result/Card.vue';
 
 export default {
   name: 'result',
   components: {
-    EachResult,
+    Card,
   },
   props: {
     resultItems: Array,

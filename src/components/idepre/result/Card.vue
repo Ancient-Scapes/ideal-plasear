@@ -1,16 +1,19 @@
 <template>
-  <vs-card class="cardx">
+  <vs-card class="card">
     <div slot="header">
-      <h3>
-        {{ result.name }}
-      </h3>
+      <h3>{{ headerName }}</h3>
     </div>
     <div slot="media">
       <!-- TODO 画像取得 -->
-      <img src="@/assets/logo.png">
+      <img src="@/assets/stationSample.jpg">
     </div>
     <div>
-      <span>{{ result.vicinity }}</span>
+      <div class="store">
+        {{ viewFacilityPair }}
+      </div>
+      <div class="distance">
+        {{ viewDistance }}
+      </div>
     </div>
     <div slot="footer">
       <vs-row vs-justify="flex-end">
@@ -27,7 +30,17 @@
 export default {
   name: 'card',
   props: {
-    result: Object,
+    headerName: String,
+    facilityPair: Array,
+    distance: Number,
+  },
+  computed: {
+    viewFacilityPair() {
+      return `${this.facilityPair[0]}と${this.facilityPair[1]}が近いです`;
+    },
+    viewDistance() {
+      return `店同士の距離は${this.distance}です`;
+    },
   },
   data() {
     return {
@@ -39,5 +52,7 @@ export default {
 
 
 <style lang="scss">
-
+.card {
+  margin: 20px;
+}
 </style>

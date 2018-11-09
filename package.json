@@ -13,6 +13,7 @@
     "axios": "^0.18.0",
     "jp-prefecture": "^0.2.1",
     "material-icons": "^0.2.3",
+    "spherical-geometry-js": "^1.0.1",
     "vue": "^2.5.17",
     "vue-router": "^3.0.1",
     "vuesax": "^3.5.6"
